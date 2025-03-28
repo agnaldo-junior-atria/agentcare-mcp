@@ -1,33 +1,46 @@
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { ToolHandler } from "./handlers/ToolHandler.js"
-import { FhirClient } from "./connectors/fhir/FhirClient.js"
-import { PubMed } from "./connectors/medical/PubMed.js"
-import { ClinicalTrials } from "./connectors/medical/ClinicalTrials.js"
-import { FDA } from "./connectors/medical/FDA.js"
-import { CacheManager } from "./utils/Cache.js"
-import { AuthConfig } from "./utils/AuthConfig.js"
+import { FhirClient } from "./connectors/fhir/FhirClient.js";
+import { ClinicalTrials } from "./connectors/medical/ClinicalTrials.js";
+import { FDA } from "./connectors/medical/FDA.js";
+import { PubMed } from "./connectors/medical/PubMed.js";
+import { ToolHandler } from "./handlers/ToolHandler.js";
+import { AuthConfig } from "./utils/AuthConfig.js";
+import { CacheManager } from "./utils/Cache.js";
 
 export class AgentCareServer {
-  private mcpServer: Server;
+  private mcpServer: McpServer;
   private toolHandler: ToolHandler;
   private fhirClient: FhirClient;
   private cache: CacheManager;
   private pubmedApi: PubMed;
   private trialsApi: ClinicalTrials;
   private fdaApi: FDA;
-  
-  constructor(mcpServer: Server, authConfig:AuthConfig,fhirURL: string, pubmedAPIKey: string, trialsAPIKey: string, fdaAPIKey: string) {
+
+  constructor(
+    mcpServer: McpServer,
+    authConfig: AuthConfig,
+    fhirURL: string,
+    pubmedAPIKey: string,
+    trialsAPIKey: string,
+    fdaAPIKey: string
+  ) {
     this.mcpServer = mcpServer;
     this.fhirClient = new FhirClient(fhirURL);
     this.cache = new CacheManager();
     this.pubmedApi = new PubMed(pubmedAPIKey);
     this.trialsApi = new ClinicalTrials(trialsAPIKey);
     this.fdaApi = new FDA(fdaAPIKey);
-  
-  
-    this.toolHandler = new ToolHandler(authConfig,this.fhirClient,this.cache,this.pubmedApi,this.trialsApi,this.fdaApi);
-    
+
+    this.toolHandler = new ToolHandler(
+      authConfig,
+      this.fhirClient,
+      this.cache,
+      this.pubmedApi,
+      this.trialsApi,
+      this.fdaApi
+    );
+
     this.setupHandlers();
     this.setupErrorHandling();
   }
@@ -37,7 +50,7 @@ export class AgentCareServer {
   }
 
   private setupErrorHandling() {
-    this.mcpServer.onerror = (error) => {
+    this.mcpServer.server.onerror = (error) => {
       console.error("[MCP Error]", error);
     };
 
@@ -49,8 +62,8 @@ export class AgentCareServer {
 
   async run() {
     const transport = new StdioServerTransport();
-    
+
     await this.mcpServer.connect(transport);
     console.error("FHIR MCP server running on stdio");
   }
-} 
+}
