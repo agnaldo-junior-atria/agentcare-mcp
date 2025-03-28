@@ -30,18 +30,6 @@ if (!FHIR_BASE_URL) {
   throw new Error("FHIR_BASE_URL is missing");
 }
 
-if (!PUBMED_API_KEY) {
-  throw new Error("PUBMED_API_KEY is missing");
-}
-
-if (!TRIALS_API_KEY) {
-  throw new Error("TRIALS_API_KEY is missing");
-}
-
-if (!FDA_API_KEY) {
-  throw new Error("FDA_API_KEY is missing");
-}
-
 const mcpServer = new McpServer(
   {
     name: "agent-care-mcp-server",

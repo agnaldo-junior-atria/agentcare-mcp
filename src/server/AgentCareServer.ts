@@ -13,9 +13,9 @@ export class AgentCareServer {
   private toolHandler: ToolHandler;
   private fhirClient: FhirClient;
   private cache: CacheManager;
-  private pubmedApi: PubMed;
-  private trialsApi: ClinicalTrials;
-  private fdaApi: FDA;
+  private pubmedApi?: PubMed;
+  private trialsApi?: ClinicalTrials;
+  private fdaApi?: FDA;
 
   constructor(
     mcpServer: McpServer,
@@ -28,9 +28,18 @@ export class AgentCareServer {
     this.mcpServer = mcpServer;
     this.fhirClient = new FhirClient(fhirURL);
     this.cache = new CacheManager();
-    this.pubmedApi = new PubMed(pubmedAPIKey);
-    this.trialsApi = new ClinicalTrials(trialsAPIKey);
-    this.fdaApi = new FDA(fdaAPIKey);
+
+    if (pubmedAPIKey) {
+      this.pubmedApi = new PubMed(pubmedAPIKey);
+    }
+
+    if (trialsAPIKey) {
+      this.trialsApi = new ClinicalTrials(trialsAPIKey);
+    }
+
+    if (fdaAPIKey) {
+      this.fdaApi = new FDA(fdaAPIKey);
+    }
 
     this.toolHandler = new ToolHandler(
       authConfig,

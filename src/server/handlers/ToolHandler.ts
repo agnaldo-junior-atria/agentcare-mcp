@@ -18,20 +18,20 @@ import { CacheManager } from "../utils/Cache.js";
 export class ToolHandler {
   private fhirClient: FhirClient;
   private cache: CacheManager;
-  private pubmedApi: PubMed;
-  private trialsApi: ClinicalTrials;
-  private fdaApi: FDA;
   private auth!: Auth;
   private authInitialized: boolean = false;
   private authConfig: AuthConfig;
+  private pubmedApi?: PubMed;
+  private trialsApi?: ClinicalTrials;
+  private fdaApi?: FDA;
 
   constructor(
     authConfig: AuthConfig,
     fhirClient: FhirClient,
     cache: CacheManager,
-    pubmedApi: PubMed,
-    trialsApi: ClinicalTrials,
-    fdaApi: FDA
+    pubmedApi?: PubMed,
+    trialsApi?: ClinicalTrials,
+    fdaApi?: FDA
   ) {
     this.authConfig = authConfig;
     this.cache = cache;
@@ -127,16 +127,34 @@ export class ToolHandler {
             request.params.arguments
           );
         case "search-pubmed":
+          if (!this.pubmedApi) {
+            throw new McpError(
+              ErrorCode.InternalError,
+              `PubMed intergration disabled`
+            );
+          }
           return await this.pubmedApi.getArticles(
             request.params.arguments,
             this.cache
           );
         case "search-trials":
+          if (!this.trialsApi) {
+            throw new McpError(
+              ErrorCode.InternalError,
+              `Trials integration disabled`
+            );
+          }
           return await this.trialsApi.getTrials(
             request.params.arguments,
             this.cache
           );
         case "get-drug-info":
+          if (!this.fdaApi) {
+            throw new McpError(
+              ErrorCode.InternalError,
+              `FDA integration disabled`
+            );
+          }
           return await this.fdaApi.getDrug(
             request.params.arguments,
             this.cache
